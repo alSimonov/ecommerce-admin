@@ -6,12 +6,14 @@ import { headers } from "@/next.config";
 import Spinner from "./Spinner";
 import { ReactSortable } from "react-sortablejs";
 import { Category } from "@/models/Category";
+import PhotoUpload from "./PhotoUpload";
+import InputLines from "./InputLines";
 
 export default function ProductForm({
 	_id,
 	title:existingTitle, 	
 	description:existingDescription, 
-	price:existingPrice,
+	prices:existingPrices,
 	images: existingImages,
 	category:assignedCategory,
 	properties:assignedProperties
@@ -21,11 +23,12 @@ export default function ProductForm({
 	const [description, setDescription] = useState(existingDescription || '');
 	const [category, setCategory] = useState(assignedCategory || '');
 	const [productProperties, setProductProperties] = useState(assignedProperties || {});
-	const [price, setPrice] = useState(existingPrice || '');
 	const [images, setImages] = useState(existingImages || []);
 	const [goToProducts, setgoToProducts] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 	const [categories, setCategories] = useState([]);
+	const [prices, setPrices] = useState(existingPrices || [{value:'', measure:''}]);
+
 	const router = useRouter();
 	useEffect(() => {
 		axios.get('/api/categories').then(result => {
@@ -36,7 +39,12 @@ export default function ProductForm({
 	async function saveProduct(ev) {
 		ev.preventDefault();
 		const data = {
-			title, description, price, images, category, 
+			title, description, 
+			prices:prices.map(p => ({
+				value:p.value, 
+				measure:p.measure
+			})), 
+			images, category, 
 			properties:productProperties
 		};
 		if (_id) {
@@ -53,28 +61,6 @@ export default function ProductForm({
 		router.push('/products');
 	}
 
-	async function uploadImages(ev){
-		const files = ev.target?.files;
-		if(files.length > 0) {
-			setIsUploading(true);
-			const data = new FormData();
-			for (const file of files) {
-				data.append('file', file);
-			}
-			
-			console.log(files);
-
-			const res = await axios.post('/api/upload', data);
-
-			setImages(oldImages => {
-				return [...oldImages, ...res.data.links];
-			});
-			setIsUploading(false);
-		}
-	}
-	function updateImagesOrder(images) {
-		setImages(images);
-	}
 	function setProductProp(propName, value){
 		setProductProperties(prev => {
 			const newProductProps = {...prev};
@@ -94,6 +80,34 @@ export default function ProductForm({
 		}
 	}
 	
+
+	function addPrice(){
+    setPrices(prev => {
+      return [...prev, {value:'', measure:''}];
+    });
+  }
+  function handlePriceValueChange(index, newValue){
+    setPrices(prev => {
+      const properties = [...prev];
+      properties[index].value = newValue;
+      return properties;
+    });
+  }
+  function handlePriceMeasureChange(index, newMeasure){
+    setPrices(prev => {
+      const properties = [...prev];
+      properties[index].measure = newMeasure;
+      return properties;
+    });
+  }
+  function removePrice(indexToRemove){
+    setPrices(prev => {
+      return [...prev].filter((p, pIndex) => {
+        return pIndex !== indexToRemove;
+      });
+    });
+  }
+
 	return (
 	
 		<form onSubmit={saveProduct}>
@@ -135,48 +149,51 @@ export default function ProductForm({
 				Фотографии
 				{/* Photos  */}
 			</label>
-			<div className="mb-2 flex flex-wrap gap-1">
-				<ReactSortable list={images} className="flex flex-wrap gap-1" setList={updateImagesOrder}>
-					{!!images?.length && images.map(link => (
-						<div key={link} className=" h-24 bg-white p-4 shadow-sm rounded-sm border border-gray-200">
-							<img src={link} alt="" className="rounded-lg"/>
-						</div>
-					))}
-				</ReactSortable>
-				{isUploading && (
-					<div className="h-24 flex items-center">
-						<Spinner />
-					</div>
-				)}
-				<label className="w-24 h-24 cursor-pointer test-center flex  flex-col items-center justify-center text-sm gap-1 text-primary 
-				rounded-sm bg-white shadow-sm border border-primary"
-				>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-						<path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-					</svg>
-					<div>
-						Загрузить
-						{/* Upload */}
-					</div>
-					<input type="file" onChange={uploadImages} className="hidden"/>
-				</label>
-			</div>
+			
+			<PhotoUpload {...{images, setImages, isUploading, setIsUploading}}/>
+
 			<label>Описание</label>
 			{/* <label>Description</label> */}
 			<textarea 
-				placeholder="description" 
+				placeholder="описание товара"  
 				value={description}
 				onChange={ev => setDescription(ev.target.value)}
 			/>
 
-			<label>Цена</label>
-			{/* <label>Price (in USD)</label> */}
-			<input 
-				type="number" 
-				placeholder="price"
-				value={price}
-				onChange={ev => setPrice(ev.target.value)}
-			/>
+			<label className="block">Цена</label>
+			<button 
+				onClick={addPrice}
+				type="button" 
+				className="btn-default text-sm mb-2 block" 
+			>
+				Добавить цены
+			</button>
+			{prices.length > 0 && prices.map( (price, index) => (
+				<div className="flex gap-1 mb-2">
+					<input 
+						type="number"  
+						value={price.value}
+						className="mb-0" 
+						onChange={ev => handlePriceValueChange(index, ev.target.value)}
+						placeholder="Цена"
+						/>
+					<input 
+						type="text" 
+						className="mb-0" 
+						onChange={ev => handlePriceMeasureChange(index, ev.target.value)}
+						value={price.measure} 
+						placeholder="Мера измерения (например: шт., куб.)"
+						/>
+					<button 
+						onClick={() => removePrice(index)}
+						type="button"
+						className="btn-red">
+						Удалить
+						{/* Remove */}
+					</button>
+				</div>
+			))} 
+
 			<button 
 				type="submit" 
 				className="btn-primary"

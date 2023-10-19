@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import PhotoUpload from "@/components/PhotoUpload";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { withSwal } from 'react-sweetalert2';
@@ -9,10 +10,16 @@ function Categories({swal}) {
   const [parentCategory, setParentCategory] = useState('');
   const [categories, setCategories] = useState([]);
   const [properties, setProperties] = useState([]);
+  const [images, setImages] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
   },[])
+ 
+
+
+
 
   function fetchCategories() {
     axios.get('/api/categories').then(result => {
@@ -24,6 +31,7 @@ function Categories({swal}) {
     const data = {
       name, 
       parentCategory, 
+      images,
       properties:properties.map(p => ({
         name:p.name, 
         values:p.values.split(',')
@@ -38,6 +46,7 @@ function Categories({swal}) {
     }
     setName('');
     setParentCategory('');
+    setImages([]);
     setProperties([]);
     fetchCategories();
   }
@@ -45,6 +54,7 @@ function Categories({swal}) {
     setEditedCategory(category);
     setName(category.name);
     setParentCategory(category.parent?._id);
+    setImages(category.images);
     setProperties(category.properties.map(({name,values}) => ({
       name, 
       values:values.join(',')
@@ -72,14 +82,14 @@ function Categories({swal}) {
       return [...prev, {name:'', values:''}];
     });
   }
-  function handlePropertyNameChange(index, property, newName){
+  function handlePropertyNameChange(index, newName){
     setProperties(prev => {
       const properties = [...prev];
       properties[index].name = newName;
       return properties;
     });
   }
-  function handlePropertyValuesChange(index, property, newValues){
+  function handlePropertyValuesChange(index, newValues){
     setProperties(prev => {
       const properties = [...prev];
       properties[index].values = newValues;
@@ -97,15 +107,12 @@ function Categories({swal}) {
   return (
     <Layout>
       <h1>Категории</h1>
-      {/* <h1>Categories</h1> */}
       <label>{editedCategory ? `Изменить категорию ${editedCategory.name}`: 'Создать новую категорию'}</label>
-      {/* <label>{editedCategory ? `Edit category ${editedCategory.name}`: 'Create new category'}</label> */}
       <form onSubmit={saveCategory} >
         <div className="flex gap-1">
           <input 
             type="text" 
             placeholder={'Наименование категории'} 
-            // placeholder={'Category name'} 
             onChange={ev => setName(ev.target.value)}
             value={name}
           />
@@ -114,22 +121,24 @@ function Categories({swal}) {
             onChange={ev => setParentCategory(ev.target.value)}
           >
             <option value="">Нет родительской категории</option>
-            {/* <option value="">No parent category</option> */}
             {categories.length > 0 && categories.map(category => (
               <option value={category._id}>{category.name}</option>
             ))}
           </select>
         </div>
+
+        <label>Фотографии</label>
+        <PhotoUpload  {...{images, setImages, isUploading, setIsUploading}}/>
+
         <div className="mb-2">
           <label className="block ">Свойства</label>
-          {/* <label className="block ">Properties</label> */}
+         
           <button 
             onClick={addProperty}
             type="button" 
             className="btn-default text-sm mb-2" 
           >
             Добавить новое свойство
-            {/* Add new property */}
           </button>
           {properties.length > 0 && properties.map( (property, index) => (
             <div className="flex gap-1 mb-2">
@@ -137,24 +146,21 @@ function Categories({swal}) {
                 type="text" 
                 value={property.name}
                 className="mb-0" 
-                onChange={ev => handlePropertyNameChange(index, property, ev.target.value)}
+                onChange={ev => handlePropertyNameChange(index, ev.target.value)}
                 placeholder="наименование свойства (например: цвет)"
-                // placeholder="property name (example: color)"
                 />
               <input 
                 type="text" 
                 className="mb-0" 
-                onChange={ev => handlePropertyValuesChange(index, property, ev.target.value)}
+                onChange={ev => handlePropertyValuesChange(index, ev.target.value)}
                 value={property.values} 
                 placeholder="значения, разделенные запятой"
-                // placeholder="values, comma separeted"
                 />
               <button 
                 onClick={() => removeProperty(index)}
                 type="button"
                 className="btn-red">
                 Удалить
-                {/* Remove */}
               </button>
             </div>
           ))} 
@@ -172,7 +178,6 @@ function Categories({swal}) {
               }}
             >
               Отменить
-              {/* Cancel */}
             </button>
 
           )}
@@ -181,7 +186,6 @@ function Categories({swal}) {
             className="btn-primary py-1"
           >
             Сохранить
-            {/* Save */}
           </button>
         </div>
       </form>
@@ -192,8 +196,6 @@ function Categories({swal}) {
             <tr>
               <td>Наименование категории</td>
               <td>Родительская категория</td>
-              {/* <td>Category name</td>
-              <td>Parent category</td> */}
               <td></td>
             </tr>
           </thead>
@@ -208,14 +210,12 @@ function Categories({swal}) {
                     className="btn-default mr-1"
                   >
                     Изменить
-                    {/* Edit */}
                   </button>
                   <button 
                     onClick={() => deleteCategory(category)}
                     className="btn-red"
                   >
                     Удалить
-                    {/* Delete */}
                   </button>
                 </td>
               </tr>

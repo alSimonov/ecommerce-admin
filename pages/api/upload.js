@@ -18,7 +18,7 @@ export default async function handle(req, res) {
 			resolve({fields, files});
 		});
 	});
-	console.log('length:', files.file.length);
+
 	cloudinary.config({ 
 		cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
 		api_key: process.env.CLOUDINARY_API_KEY, 
