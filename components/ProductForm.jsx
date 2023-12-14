@@ -14,6 +14,7 @@ export default function ProductForm({
 	price:existingPrice,
 	images: existingImages,
 	category:assignedCategory,
+	rate:assignedRate,
 	properties:assignedProperties
 
 }) {
@@ -26,6 +27,7 @@ export default function ProductForm({
 	const [goToProducts, setgoToProducts] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 	const [categories, setCategories] = useState([]);
+	const [rate, setRate] = useState(assignedRate || 0);
 	const router = useRouter();
 	useEffect(() => {
 		axios.get('/api/categories').then(result => {
