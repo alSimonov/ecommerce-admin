@@ -1,4 +1,5 @@
-const {model, Schema, models, default: mongoose } = require("mongoose");
+import mongoose, { Schema, model, models } from "mongoose";
+
 
 const ProductSchema = new Schema({
 	title: {type: String, required: true}, 
@@ -9,6 +10,5 @@ const ProductSchema = new Schema({
 	rate: {type: Number, min: 0, max: 100},
 	properties: {type:Object},
 });
-
 
 export const Product = models.Product || model('Product', ProductSchema);
