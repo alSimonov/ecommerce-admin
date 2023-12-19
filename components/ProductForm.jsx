@@ -13,7 +13,8 @@ export default function ProductForm({
 	_id,
 	title:existingTitle, 	
 	description:existingDescription, 
-	prices:existingPrices,
+	price:existingPrices,
+	measures:existingMeasures,
 	images: existingImages,
 	category:assignedCategory,
 	rate:assignedRate,
@@ -25,6 +26,8 @@ export default function ProductForm({
 	const [category, setCategory] = useState(assignedCategory || '');
 	const [productProperties, setProductProperties] = useState(assignedProperties || {});
 	const [images, setImages] = useState(existingImages || []);
+	const [price, setPrice] = useState(existingPrices || 0);
+	const [measures, setMeasures] = useState(existingMeasures || []);
 	const [goToProducts, setgoToProducts] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 	const [categories, setCategories] = useState([]);
@@ -39,10 +42,10 @@ export default function ProductForm({
 	async function saveProduct(ev) {
 		ev.preventDefault();
 		const data = {
-			title, description, 
-			prices:prices.map(p => ({
-				value:p.value, 
-				measure:p.measure
+			title, description, price,
+			measures:measures.map(m => ({
+				measure:m.measure,
+				value:m.value
 			})), 
 			images, category, 
 			properties:productProperties
@@ -81,27 +84,27 @@ export default function ProductForm({
 	}
 	
 
-	function addPrice(){
-    setPrices(prev => {
-      return [...prev, {value:'', measure:''}];
+	function addMeasure(){
+    setMeasures(prev => {
+      return [...prev, {measure:'', value:1}];
     });
   }
-  function handlePriceValueChange(index, newValue){
-    setPrices(prev => {
+  function handleMeasureValueChange(index, newValue){
+    setMeasures(prev => {
       const properties = [...prev];
       properties[index].value = newValue;
       return properties;
     });
   }
-  function handlePriceMeasureChange(index, newMeasure){
-    setPrices(prev => {
+  function handleMeasureChange(index, newMeasure){
+    setMeasures(prev => {
       const properties = [...prev];
       properties[index].measure = newMeasure;
       return properties;
     });
   }
-  function removePrice(indexToRemove){
-    setPrices(prev => {
+  function removeMeasure(indexToRemove){
+    setMeasures(prev => {
       return [...prev].filter((p, pIndex) => {
         return pIndex !== indexToRemove;
       });
@@ -160,36 +163,46 @@ export default function ProductForm({
 				onChange={ev => setDescription(ev.target.value)}
 			/>
 
-			<label className="block">Цена</label>
-			<button 
-				onClick={addPrice}
+			<label className="block">Цена (за единицу)</label>
+
+			<input 
+						type="number"  
+						value={price}
+						className="mb-5" 
+						onChange={ev => setPrice(ev.target.value)}
+						placeholder="Цена"
+						/>
+
+			{<button 
+				onClick={addMeasure}
 				type="button" 
 				className="btn-default text-sm mb-2 block" 
 			>
-				Добавить цены
-			</button>
-			{prices.length > 0 && prices.map( (price, index) => (
+				Добавить меру измерения
+			</button>}
+			
+			{measures.length > 0 && measures.map( (measure, index) => (
 				<div className="flex gap-1 mb-2">
-					<input 
-						type="number"  
-						value={price.value}
-						className="mb-0" 
-						onChange={ev => handlePriceValueChange(index, ev.target.value)}
-						placeholder="Цена"
-						/>
 					<input 
 						type="text" 
 						className="mb-0" 
-						onChange={ev => handlePriceMeasureChange(index, ev.target.value)}
-						value={price.measure} 
-						placeholder="Мера измерения (например: шт., куб.)"
+						onChange={ev => handleMeasureChange(index, ev.target.value)}
+						value={measure.measure} 
+						placeholder="Мера измерения (например: шт., кг., куб.)"
+						/>
+					<input 
+						type="number"  
+						value={measure.value}
+						className="mb-0" 
+						onChange={ev => handleMeasureValueChange(index, ev.target.value)}
+						placeholder="Количество эквивалентное количество штук"
 						/>
 					<button 
-						onClick={() => removePrice(index)}
+						onClick={() => removeMeasure(index)}
 						type="button"
 						className="btn-red">
 						Удалить
-						{/* Remove */}
+
 					</button>
 				</div>
 			))} 
