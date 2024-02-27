@@ -33,13 +33,42 @@ export default function ProductForm({
 	const [categories, setCategories] = useState([]);
 	const [rate, setRate] = useState(assignedRate || 0);
 	const router = useRouter();
+
+	
+	const [errorTitleClass, setErrorTitleClass] = useState( title ? "hidden": "warning");
+	const [errorCategoryClass, setErrorCategoryClass] = useState( category ? "hidden": "warning");
+
+
 	useEffect(() => {
 		axios.get('/api/categories').then(result => {
 			setCategories(result.data);
 		})
 	},[]);
 
+
+	function changeTitle(value){
+		if (!value){
+			setErrorTitleClass("warning");
+		}
+		else{
+			setErrorTitleClass("hidden");
+		}
+		setTitle(value);
+	}
+
+	function changeCategory(value){
+		if (!value){
+			setErrorCategoryClass("warning");
+		}
+		else{
+			setErrorCategoryClass("hidden");
+		}
+		setCategory(value);
+	}
+
+
 	async function saveProduct(ev) {
+
 		ev.preventDefault();
 		const data = {
 			title, description, price,
@@ -75,11 +104,17 @@ export default function ProductForm({
 	const propertiesToFill = [];
 	if(categories.length > 0 && category){
 		let catInfo = categories.find(({_id}) => _id === category);
-		propertiesToFill.push(...catInfo.properties)
-		while(catInfo?.parent?._id){
-			const parentCat = categories.find(({_id}) => _id === catInfo?.parent?._id);
-			propertiesToFill.push(...parentCat.properties);
-			catInfo = parentCat;
+		if(catInfo){
+			propertiesToFill.push(...catInfo.properties)
+			while(catInfo?.parent?._id){
+				const parentCat = categories.find(({_id}) => _id === catInfo?.parent?._id);
+				propertiesToFill.push(...parentCat.properties);
+				catInfo = parentCat;
+			}
+		}
+		else if (errorCategoryClass !== "warning"){
+			setErrorCategoryClass("warning");
+			alert("Категория этого товара была не найдена, установите новую.");
 		}
 	}
 	
@@ -119,13 +154,17 @@ export default function ProductForm({
 			<input 
 				text="text" 
 				placeholder="product name" 
-				value={title} onChange={ev => setTitle(ev.target.value)}
+				value={title} onChange={ev => changeTitle(ev.target.value)}
 			/>
+			<div>
+				<label className={errorTitleClass}>*Укажите наименование товара</label> 
+			</div>
+
 			<label>Категория</label>
 			{/* <label>Category</label> */}
 			<select 
 				value={category} 
-				onChange={ev => setCategory(ev.target.value)}
+				onChange={ev => changeCategory(ev.target.value)}
 			>
 				<option value="">Не выбрано</option>
 				{/* <option value="">Uncategorized</option> */}
@@ -148,6 +187,11 @@ export default function ProductForm({
 					</div>
 				</div>
 			))}
+
+			<div>
+				<label className={errorCategoryClass}>*Укажите категорию товара</label> 
+			</div>
+
 			<label>
 				Фотографии
 				{/* Photos  */}

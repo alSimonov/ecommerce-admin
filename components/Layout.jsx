@@ -3,17 +3,39 @@ import { useSession, signIn, signOut } from "next-auth/react"
 import Nav from "@/components/Nav";
 import { useState } from "react";
 import Logo from "./Logo";
+import IconForest from "./Icons/IconForest";
+import IconYandex from "./Icons/IconYandex";
   
 export default function Layout({children}) {
   const [showNav, setShowNav] = useState(false);
   const { data: session } = useSession();
   if(!session) {
     return (
-      <div className='bg-bgGray w-screen h-screen flex items-center'>
-        <div className="text-center w-full">
-          <button onClick={() => signIn('yandex')} className="bg-white p-2 px-4 rounded-lg">
-            Logging with Yandex
-          </button>
+      <div className='bg-gray-200 w-screen h-screen flex items-center'>
+        <div className="text-center w-full flex justify-center items-center">
+
+          <div className="bg-white rounded-xl p-5 m-8 justify-center items-center">
+
+            <div className="rounded-full bg-gray-100 w-28 h-28 mx-auto mb-2 "> 
+              < IconForest />
+            </div>
+            <div className="mb-10 text-lg font-bold "> 
+              ПИЛОРАМА 
+            </div>
+
+            <button onClick={() => signIn('yandex')} className="bg-gray-100 p-2 px-4 rounded-lg flex mb-4 w-full">
+              < IconYandex /> 
+              <div className="">
+                Авторизироваться
+              </div> 
+            </button>
+
+            <a href="/" className="underline text-gray-500">
+              Регистрация
+            </a>
+          </div>
+
+
         </div>
       </div> 
     )

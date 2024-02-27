@@ -21,6 +21,7 @@ export default function EditProductPage() {
 		<Layout>
 			{/* <h1>Edit Product</h1> */}
 			<h1>Изменить товар</h1>
+			
 			{productInfo && (
 				<ProductForm {...productInfo}/>
 			)}
