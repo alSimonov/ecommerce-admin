@@ -13,7 +13,12 @@ export const authOptions = {
         clientSecret: process.env.YANDEX_CLIENT_SECRET
     }),
     ],
-    adapter: MongoDBAdapter(clientPromise),
+    adapter: MongoDBAdapter(clientPromise, {
+        Users: "ClientUsers",
+        Accounts: "ClientAccounts",
+        Sessions: "ClientSessions",
+        VerificationTokens: "ClientVerificationTokens"
+      }),
     callbacks: {
         session: ({session, token, user}) => {
             if(adminEmails.includes(session?.user?.email) ){

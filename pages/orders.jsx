@@ -15,10 +15,10 @@ export default function OrdersPage(){
       <table className="basic">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Paid</th>
-            <th>Recipient</th>
-            <th>Products</th>
+            <th>Дата</th>
+            <th>Оплата</th>
+            <th>Заказчик</th>
+            <th>Товары</th>
           </tr>
         </thead>
         <tbody>
@@ -27,6 +27,7 @@ export default function OrdersPage(){
               <td>{(new Date(order.createdAt)).toLocaleString()}</td>
               <td className={order.paid ? 'text-green-600' : 'text-red-600' }>
                 {order.paid? "YES" : "NO"}
+                {console.log(order)}
               </td>
               <td>
                 {order.name} {order.email}<br/>
@@ -36,8 +37,7 @@ export default function OrdersPage(){
               <td>
                 {order.line_items.map(l => (
                   <>
-                    {l.price_data?.product_data.name} x {l.quantity}<br/>
-                    
+                    {l.price_data?.product_data?.name} x {l.quantity}<br/>                    
                   </>
                 ))}
               </td>
