@@ -1,10 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // transpilePackages: ['BatChart.ts'],
-}
+  transpilePackages: ["@mui/x-charts"],
+};
 
-const transpiledModules = require('next-transpile-modules')(["@mui/x-charts"]);
+// const transpiledModules = require('next-transpile-modules')(["@mui/x-charts"]);
 
-module.exports = transpiledModules;
-// module.exports = nextConfig
+module.exports = nextConfig;

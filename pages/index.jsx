@@ -7,18 +7,23 @@ import { PieChart } from '@mui/x-charts/PieChart';
 import { useEffect, useState } from "react";
 import IconArrowUp from "@/components/Icons/IconArrowUp";
 import IconArrowDown from "@/components/Icons/IconArrowDown";
-import { LinearProgress } from "@mui/material";
+import { CircularProgress, LinearProgress } from "@mui/material";
 import axios from "axios";
+import { mongooseConnect } from "@/lib/mongoose";
+import { Order } from "@/models/Order";
+import { Product } from "@/models/Product";
+import Link from "next/link";
 
 
 
 
 
 
-export default function Home() {
+export default function Home({orders, ordersNew, productsNew}) {
   const { data: session } = useSession();
   
-  const [orders, setOrders] = useState();
+  // const [orders, setOrders] = useState();
+  const [categories, setCategories] = useState();
 
   const [profitForThisMonth, setProfitForThisMonth] = useState("20000");
   const [profitForLastMonth, setProfitForLastMonth] = useState("27000");
@@ -34,7 +39,7 @@ export default function Home() {
 
   const [totalOrders, setTotalOrders] = useState("65");
   const [lastMonthOrders, setLastMonthOrders] = useState("80");
-  const [percentOrders, setPercentOrders] = useState();
+  const [percentOrders, setPercentOrders] = useState("50");
 
   const monthNames = [
     "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
@@ -42,30 +47,49 @@ export default function Home() {
   ]
 
   const [nowMonth, setNowMonth] = useState();
-  const [actualMonthSort, setActualMonthSort] = useState();
-  const [monthsProfit, setMonthsProfit] = useState();
+  const [actualMonthSort, setActualMonthSort] = useState([]);
+  const [monthsProfit, setMonthsProfit] = useState([]);
 
+  const [categoriesName, setCategoriesName] = useState();
 
-
-  
 
   useEffect(() => {
-		axios.get('/api/orders').then(response => {
-			setOrders(response.data);
+		// axios.get('/api/categories').then(response => {
+		// 	setCategories(response.data);
 
-      processOrders(response.data);
+    //   processCategories(response.data);
+       
+      
+		// });
+    
+    // axios.get('/api/orders').then(resp => {
+    //   setOrders(resp.data);
 
-		});
-
-
-
+    
+    // });
+    
+    processOrders(orders);
+    
+ 
 	}, []) 
+
+
+
+  function processCategories(categories) {
+    setCategoriesName(categories.map(p => p.name));
+
+
+
+  }
+
 
   function processOrders(orders){
 
 
+  
 
-    console.log("fffffffffffff");
+
+    // console.log("fffffffffffff");
     // console.log(orders);
 
     var today = new Date();
@@ -115,9 +139,6 @@ export default function Home() {
     setMonthsProfit(Object.values(ProfitForMonth));
 
 
-
-
-
     // const OrdersForMonth[actualMonthSortTemp[11]] = orders.filter(p => p.createdAt.substr(0,7) === mmNow) ;
     // const OrdersForMonth[actualMonthSortTemp[10]] = orders.filter(p => p.createdAt.substr(0,7) === mmLast) ;
 
@@ -154,7 +175,7 @@ export default function Home() {
 
 
 
-    console.log(clientsForLastMonth); 
+    
   
   }
 
@@ -266,7 +287,7 @@ export default function Home() {
               </div>
               
               <div className="mt-3">
-                <LinearProgress variant="determinate" value={percentProfitGoal} />
+                <LinearProgress variant="determinate" value={Number( percentProfitGoal )} />              
               </div>
 
 
@@ -308,16 +329,28 @@ export default function Home() {
 
         <div className="flex mt-4 ">
           <div className="bg-white px-4 py-5 rounded-lg shadow-lg w-full mr-4">
-            <BarChart
-              series={[
-                { data: monthsProfit, label: 'Прибыль'  },
-                // { data: [51000, 6000, 49000, 30000, 6000, 49000, 30000, 6000, 49000, 30000, 6000, 49000], label: 'План продаж' },
-              ]}
-              // height={290}
+            
+        
+
+            { monthsProfit.length > 0 && actualMonthSort.length > 0 &&
               
-              xAxis={[{ data: actualMonthSort, scaleType: 'band' }]}
-              margin={{ top: 10, bottom: 30, left: 70, right: 10 }}
-            />
+              <BarChart
+
+                series={[
+
+                  { data: monthsProfit, label: 'Прибыль'  },
+                  // { data: [51000, 6000, 49000, 30000, 6000, 49000, 30000, 6000, 49000, 30000, 6000, 49000], label: 'План продаж' },
+                  // { data: [51000, 6000, 49000, 30000, 6000, 49000, 30000, 6000, 49000, 30000, 6000, 49000], label: 'fffff' },
+                ]}
+                height={290}
+                
+                xAxis={[{ data: actualMonthSort, scaleType: 'band' }]}
+                margin={{ top: 10, bottom: 30, left: 70, right: 10 }}
+              />
+
+              
+            }
+
 
           </div>
 
@@ -359,10 +392,52 @@ export default function Home() {
         </div>
 
         <div className="flex mt-4">
-          <div className="bg-white px-4 py-5 rounded-lg shadow-lg w-full mr-4">
+          <div className="bg-white px-4 py-5 rounded-lg shadow-lg w-1/2 mr-4">
             <div className="text-lg">
               Последние товары  
-            </div>    
+            </div>   
+
+
+
+            <table className="basic mt-2">
+              <thead>
+                <tr>
+                  {/* <td>Product name</td> */}
+                  <td></td>
+                  <td>Наименование товара</td>
+                  <td></td>
+                </tr>
+              </thead>
+              <tbody>
+                {productsNew.map(product => (
+                  <tr key={product._id}>
+                    <td>
+                    <div className=" h-16 w-16 bg-white shadow-sm rounded-sm border border-gray-200">
+                      <img src={product.images[0]} alt="" className="rounded-lg"/>
+                    </div>
+                    </td>
+                    <td>
+                      {product.title}
+                      { product.updatedAt &&
+                        <div className="text-sm text-gray-500">
+                          Последнее изменение  { product.updatedAt?.substr(0,10)}
+                        </div>
+
+                      }
+                    </td>
+                    <td>
+                      <Link className="btn-default" href={'/products/edit/'+product._id}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                      </svg>
+                        {/* Edit */}
+                      </Link>
+
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table> 
 
           </div>
 
@@ -373,6 +448,41 @@ export default function Home() {
               </div>
 
               <div>
+
+                <table className="basic">
+                  <thead>
+                    <tr>
+                      <th>Дата</th>
+                      <th>Оплата</th>
+                      <th>Заказчик</th>
+                      <th>Товары</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ordersNew.length > 0 && ordersNew.map(order => (
+                      <tr>
+                        <td>{(new Date(order.createdAt)).toLocaleString()}</td>
+                        <td className={order.paid ? 'text-green-600' : 'text-red-600' }>
+                          {order.paid? "YES" : "NO"}
+                       
+                        </td>
+                        <td>
+                          {order.name} {order.email}<br/>
+                          {order.city} {order.postalCode} {order.country}<br/> 
+                          {order.streetAddress}
+                        </td>
+                        <td>
+                          {order.line_items.map(l => (
+                            <>
+                              {l.price_data?.product_data?.name} x {l.quantity}<br/>                    
+                            </>
+                          ))}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
 
               </div>
 
@@ -409,3 +519,18 @@ export default function Home() {
 }
 
 
+export async function getServerSideProps() {
+  await mongooseConnect();
+  const ordersNew = await Order.find({}, null, { sort: {'createdAt': -1}, limit: 5 });
+  const orders = await Order.find({}, null, {sort: {'_id': -1}});
+  const productsNew = await Product.find({}, null, {sort: {'updatedAt': -1} , limit: 5 });
+
+  return {
+    props: {
+      ordersNew: JSON.parse(JSON.stringify(ordersNew)),
+      orders: JSON.parse(JSON.stringify(orders)),
+      productsNew: JSON.parse(JSON.stringify(productsNew)),
+    },
+  };
+
+}
