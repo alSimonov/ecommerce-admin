@@ -148,118 +148,123 @@ export default function ProductForm({
 
 	return (
 	
-		<form onSubmit={saveProduct}>
-			<label>Наименование товара</label>
-			{/* <label>Product name</label> */}
-			<input 
-				text="text" 
-				placeholder="product name" 
-				value={title} onChange={ev => changeTitle(ev.target.value)}
-			/>
-			<div>
-				<label className={errorTitleClass}>*Укажите наименование товара</label> 
-			</div>
+		<div className="bg-white px-4 py-5 rounded-lg shadow-lg ">
 
-			<label>Категория</label>
-			{/* <label>Category</label> */}
-			<select 
-				value={category} 
-				onChange={ev => changeCategory(ev.target.value)}
-			>
-				<option value="">Не выбрано</option>
-				{/* <option value="">Uncategorized</option> */}
-				{categories.length > 0 && categories.map(c => (
-					<option value={c._id}>{c.name}</option>
-				))}
-			</select>
-			{propertiesToFill.length > 0 && propertiesToFill.map(p => (
-				<div className="">
-					<label>{p.name[0].toUpperCase()+p.name.substring(1)}</label>
-					<div>
-						<select 
-							value={productProperties[p.name]} 
-							onChange={ev => setProductProp(p.name, ev.target.value)}
-						>
-							{p.values.map(v => (
-								<option value={v}>{v}</option>
-							))}
-						</select>
+			<form onSubmit={saveProduct}>
+				<label>Наименование товара</label>
+				{/* <label>Product name</label> */}
+				<input 
+					text="text" 
+					placeholder="product name" 
+					value={title} onChange={ev => changeTitle(ev.target.value)}
+				/>
+				<div>
+					<label className={errorTitleClass}>*Укажите наименование товара</label> 
+				</div>
+
+				<label>Категория</label>
+				{/* <label>Category</label> */}
+				<select 
+					value={category} 
+					onChange={ev => changeCategory(ev.target.value)}
+				>
+					<option value="">Не выбрано</option>
+					{/* <option value="">Uncategorized</option> */}
+					{categories.length > 0 && categories.map(c => (
+						<option value={c._id}>{c.name}</option>
+					))}
+				</select>
+				{propertiesToFill.length > 0 && propertiesToFill.map(p => (
+					<div className="">
+						<label>{p.name[0].toUpperCase()+p.name.substring(1)}</label>
+						<div>
+							<select 
+								value={productProperties[p.name]} 
+								onChange={ev => setProductProp(p.name, ev.target.value)}
+							>
+								{p.values.map(v => (
+									<option value={v}>{v}</option>
+								))}
+							</select>
+						</div>
 					</div>
+				))}
+
+				<div>
+					<label className={errorCategoryClass}>*Укажите категорию товара</label> 
 				</div>
-			))}
 
-			<div>
-				<label className={errorCategoryClass}>*Укажите категорию товара</label> 
-			</div>
+				<label>
+					Фотографии
+					{/* Photos  */}
+				</label>
+				
+				<PhotoUpload {...{images, setImages, isUploading, setIsUploading}}/>
 
-			<label>
-				Фотографии
-				{/* Photos  */}
-			</label>
-			
-			<PhotoUpload {...{images, setImages, isUploading, setIsUploading}}/>
+				<label>Описание</label>
+				{/* <label>Description</label> */}
+				<textarea 
+					placeholder="описание товара"  
+					value={description}
+					onChange={ev => setDescription(ev.target.value)}
+				/>
 
-			<label>Описание</label>
-			{/* <label>Description</label> */}
-			<textarea 
-				placeholder="описание товара"  
-				value={description}
-				onChange={ev => setDescription(ev.target.value)}
-			/>
+				<label className="block">Цена (за единицу)</label>
 
-			<label className="block">Цена (за единицу)</label>
+				<input 
+							type="number"  
+							value={price}
+							className="mb-5" 
+							onChange={ev => setPrice(ev.target.value)}
+							placeholder="Цена"
+							/>
 
-			<input 
-						type="number"  
-						value={price}
-						className="mb-5" 
-						onChange={ev => setPrice(ev.target.value)}
-						placeholder="Цена"
-						/>
+				{<button 
+					onClick={addMeasure}
+					type="button" 
+					className="btn-default text-sm mb-2 block" 
+				>
+					Добавить меру измерения
+				</button>}
+				
+				{measures.length > 0 && measures.map( (measure, index) => (
+					<div className="flex gap-1 mb-2">
+						<input 
+							type="text" 
+							className="mb-0" 
+							onChange={ev => handleMeasureChange(index, ev.target.value)}
+							value={measure.measure} 
+							placeholder="Мера измерения (например: шт., кг., куб.)"
+							/>
+						<input 
+							type="number"  
+							value={measure.value}
+							className="mb-0" 
+							onChange={ev => handleMeasureValueChange(index, ev.target.value)}
+							placeholder="Количество эквивалентное количество штук"
+							/>
+						<button 
+							onClick={() => removeMeasure(index)}
+							type="button"
+							className="btn-red">
+							Удалить
 
-			{<button 
-				onClick={addMeasure}
-				type="button" 
-				className="btn-default text-sm mb-2 block" 
-			>
-				Добавить меру измерения
-			</button>}
-			
-			{measures.length > 0 && measures.map( (measure, index) => (
-				<div className="flex gap-1 mb-2">
-					<input 
-						type="text" 
-						className="mb-0" 
-						onChange={ev => handleMeasureChange(index, ev.target.value)}
-						value={measure.measure} 
-						placeholder="Мера измерения (например: шт., кг., куб.)"
-						/>
-					<input 
-						type="number"  
-						value={measure.value}
-						className="mb-0" 
-						onChange={ev => handleMeasureValueChange(index, ev.target.value)}
-						placeholder="Количество эквивалентное количество штук"
-						/>
-					<button 
-						onClick={() => removeMeasure(index)}
-						type="button"
-						className="btn-red">
-						Удалить
+						</button>
+					</div>
+				))} 
 
-					</button>
-				</div>
-			))} 
+				<button 
+					type="submit" 
+					className="btn-primary"
+				>
+					Сохранить
+					{/* Save */}
+				</button>
 
-			<button 
-				type="submit" 
-				className="btn-primary"
-			>
-				Сохранить
-				{/* Save */}
-			</button>
+			</form>
+		</div>
 
-		</form>
+
 
 	)
 }
