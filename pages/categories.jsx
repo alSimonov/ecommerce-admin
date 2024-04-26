@@ -13,6 +13,10 @@ function Categories({swal}) {
   const [images, setImages] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
 
+	const [description, setDescription] = useState('');
+
+
+
   useEffect(() => {
     fetchCategories();
   },[])
@@ -32,6 +36,7 @@ function Categories({swal}) {
       name, 
       parentCategory, 
       images,
+      description,
       properties:properties.map(p => ({
         name:p.name, 
         values:p.values.split(',')
@@ -47,6 +52,7 @@ function Categories({swal}) {
     setName('');
     setParentCategory('');
     setImages([]);
+    setDescription('');
     setProperties([]);
     fetchCategories();
   }
@@ -55,6 +61,7 @@ function Categories({swal}) {
     setName(category.name);
     setParentCategory(category.parent?._id);
     setImages(category.images);
+    setDescription(category.description);
     setProperties(category.properties.map(({name,values}) => ({
       name, 
       values:values.join(',')
@@ -62,11 +69,11 @@ function Categories({swal}) {
   }
   function deleteCategory(category){
     swal.fire({
-      title: 'Are you sure?',
-      text: `Do you want to delete ${category.name}?`,
+      title: 'Вы уверены?',
+      text: `Вы уверены что хотите удалить эту категорию ${category.name}?`,
       showCancelButton: true,
-      cancelButtonText: 'Cancel',
-      confirmButtonText: 'Yes, Delete!',
+      cancelButtonText: 'Отмена',
+      confirmButtonText: 'Да, удалить!',
       confirmButtonColor: '#d55',
       reverseButtons: true,
     }).then(async result => {
@@ -129,6 +136,14 @@ function Categories({swal}) {
 
         <label>Фотографии</label>
         <PhotoUpload  {...{images, setImages, isUploading, setIsUploading}}/>
+
+        <label>Описание</label>
+
+				<textarea 
+					placeholder="Общее описание товаров категории"  
+					value={description}
+					onChange={ev => setDescription(ev.target.value)}
+				/>
 
         <div className="mb-2">
           <label className="block ">Свойства</label>

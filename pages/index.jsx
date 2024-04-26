@@ -7,7 +7,7 @@ import { PieChart } from '@mui/x-charts/PieChart';
 import { useEffect, useState } from "react";
 import IconArrowUp from "@/components/Icons/IconArrowUp";
 import IconArrowDown from "@/components/Icons/IconArrowDown";
-import { CircularProgress, LinearProgress } from "@mui/material";
+import { CircularProgress, LinearProgress, Rating } from "@mui/material";
 import axios from "axios";
 import { mongooseConnect } from "@/lib/mongoose";
 import { Order } from "@/models/Order";
@@ -490,7 +490,6 @@ export default function Home({orders, ordersNew, productsNew}) {
 
 
         </div>
-
 
 
 
