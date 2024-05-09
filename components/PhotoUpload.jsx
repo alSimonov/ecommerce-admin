@@ -5,23 +5,38 @@ import axios from "axios";
 export default function PhotoUpload ({images, setImages, isUploading, setIsUploading}){
 
 	async function uploadImages(ev){
-		const files = ev.target?.files;
-		if(files.length > 0) {
-			setIsUploading(true);
-			const data = new FormData();
-			for (const file of files) {
-				data.append('file', file);
+		try {
+			const files = ev.target?.files;
+			if(files.length > 0) {
+				setIsUploading(true);
+				const data = new FormData();
+				
+				if(!files[0].type.includes("image")){
+					setIsUploading(false);
+					alert("Ошибка при загрузке файла. Тип файла не опознан.");
+				}
+				else {
+
+					data.append('file', files[0]);
+				
+					
+					console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrr");
+					console.log(files);
+					
+	
+					const res = await axios.post('/api/upload', data);
+	
+					setImages(oldImages => {
+						return [...oldImages, ...res.data.links];
+					});
+					setIsUploading(false);
+
+				}
 			}
-			
-			console.log(files);
-
-			const res = await axios.post('/api/upload', data);
-
-			setImages(oldImages => {
-				return [...oldImages, ...res.data.links];
-			});
-			setIsUploading(false);
+		} catch (error) {
+			alert("Ошибка при загрузке файла.");
 		}
+		
 	}
 	function updateImagesOrder(images) {
 		setImages(images);
@@ -52,7 +67,7 @@ export default function PhotoUpload ({images, setImages, isUploading, setIsUploa
 						Загрузить
 						{/* Upload */}
 					</div>
-					<input type="file" onChange={uploadImages} className="hidden"/>
+					<input type="file" onChange={uploadImages} accept="image/*" className="hidden"/>
 				</label>
 			</div>
     </>

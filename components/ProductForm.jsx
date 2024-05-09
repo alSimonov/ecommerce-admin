@@ -68,25 +68,27 @@ export default function ProductForm({
 
 
 	async function saveProduct(ev) {
-
-		ev.preventDefault();
-		const data = {
-			title, description, price,
-			measures:measures.map(m => ({
-				measure:m.measure,
-				value:m.value
-			})), 
-			images, category, 
-			properties:productProperties
-		};
-		if (_id) {
-			//update
-			await axios.put('/api/products', {...data, _id});
-		} else {
-			//create
-			await axios.post('/api/products', data);
+		if(errorTitleClass === "hidden" &&  errorCategoryClass === "hidden"){
+			
+			ev.preventDefault();
+			const data = {
+				title, description, price,
+				measures:measures.map(m => ({
+					measure:m.measure,
+					value:m.value
+				})), 
+				images, category, 
+				properties:productProperties
+			};
+			if (_id) {
+				//update
+				await axios.put('/api/products', {...data, _id});
+			} else {
+				//create
+				await axios.post('/api/products', data);
+			}
+			setgoToProducts(true);
 		}
-		setgoToProducts(true);
 	}
 
 	if (goToProducts){
@@ -253,13 +255,23 @@ export default function ProductForm({
 					</div>
 				))} 
 
-				<button 
-					type="submit" 
-					className="btn-primary"
-				>
-					Сохранить
-					{/* Save */}
-				</button>
+				{errorTitleClass === "hidden" &&  errorCategoryClass === "hidden" &&
+					<button 
+						type="submit" 
+						className="btn-primary"
+					>
+						Сохранить
+					</button>
+
+					||
+
+					<button 
+						className="btn-disabled"
+						>
+						Сохранить
+					</button>
+				}
+
 
 			</form>
 		</div>

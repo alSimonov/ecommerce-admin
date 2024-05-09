@@ -13,6 +13,8 @@ import { mongooseConnect } from "@/lib/mongoose";
 import { Order } from "@/models/Order";
 import { Product } from "@/models/Product";
 import Link from "next/link";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 
 
@@ -132,7 +134,7 @@ export default function Home({orders, ordersNew, productsNew}) {
     let sumProfitForMonth = 0;
     for (var i = 0; i <= 11; i++) {
       sumProfitForMonth = 0;
-      OrdersForMonth[actualMonthSortTemp[i]].map(p => p.line_items?.map( s => sumProfitForMonth += s.price_data.unit_amount ));
+      OrdersForMonth[actualMonthSortTemp[i]].map(p => p.line_items?.map( s => sumProfitForMonth += ( s.price_data.unit_amount / 100) * s.quantity ));
       ProfitForMonth[actualMonthSortTemp[i]] = sumProfitForMonth;
     }
 
@@ -205,6 +207,48 @@ export default function Home({orders, ordersNew, productsNew}) {
     // setPercentProfit( profit > lastMonthProfit ? (lastMonthProfit/profit - 1 )*100 :  (profit / lastMonthProfit - 1)*100 );
   }
 
+
+
+  const handleDownload = () => {
+    const content = document.getElementById("content-to-download");
+
+    if (!content) {
+      console.error("Element not found!");
+      return;
+    }
+
+    html2canvas(content, { scale: 3 }).then((canvas) => {
+      const paddingTop = 50;
+      const paddingRight = 50;
+      const paddingBottom = 50;
+      const paddingLeft = 50;
+
+      const canvasWidth = canvas.width + paddingLeft + paddingRight;
+      const canvasHeight = canvas.height + paddingTop + paddingBottom;
+
+      const newCanvas = document.createElement("canvas");
+      newCanvas.width = canvasWidth;
+      newCanvas.height = canvasHeight;
+      const ctx = newCanvas.getContext("2d");
+
+      if (ctx) {
+        ctx.fillStyle = "#ffffff"; // Background color
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        ctx.drawImage(canvas, paddingLeft, paddingTop);
+      }
+
+      const pdf = new jsPDF("l", "mm", "a4");
+      const imgData = newCanvas.toDataURL("image/png");
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("content.pdf");
+    });
+  };
+
+
   return (
     <Layout>
       <div className="text-blue-900 flex justify-between">
@@ -221,7 +265,13 @@ export default function Home({orders, ordersNew, productsNew}) {
       </div>
 
 
-      <div className="m-10">
+      <button  onClick={handleDownload}>
+        <div className="bg-white px-4 py-3 rounded-lg shadow-lg w-full ml-7 my-3 ">
+          Скачать PDF
+        </div>
+      </button>
+
+      <div id="content-to-download" className="mx-7 my-3">
         <div className="flex justify-between">
 
           <div className="bg-white px-4 py-5 rounded-lg shadow-lg w-full mr-4">
@@ -231,8 +281,9 @@ export default function Home({orders, ordersNew, productsNew}) {
               </div>
               
               <div className="font-bold text-xl">
-                ₽{profitForThisMonth}
+                ₽{profitForThisMonth} 
               </div>
+              ₽{profitForLastMonth}
 
               <div className="flex">
                 <div className={"flex items-center " + (percentProfit < 0 ?'text-red-500':'text-green-500')}>
@@ -259,7 +310,7 @@ export default function Home({orders, ordersNew, productsNew}) {
               <div className="font-bold text-xl">
                 {clientsForThisMonth}
               </div>
-
+              {clientsForLastMonth}
               <div className="flex">
                 <div className={"flex items-center " + (percentClients < 0 ?'text-red-500':'text-green-500')}>
                    { percentClients < 0 ? <IconArrowDown/> : <IconArrowUp/> }  { percentClients }% 
@@ -309,7 +360,7 @@ export default function Home({orders, ordersNew, productsNew}) {
               <div className="font-bold text-xl">
                 {totalOrders}
               </div>
-
+              {lastMonthOrders}
               <div className="flex">
                 <div className={"flex items-center " + (percentOrders < 0 ?'text-red-500':'text-green-500')}>
                    { percentOrders < 0 ? <IconArrowDown/> : <IconArrowUp/> }  { percentOrders }% 
@@ -335,7 +386,6 @@ export default function Home({orders, ordersNew, productsNew}) {
             { monthsProfit.length > 0 && actualMonthSort.length > 0 &&
               
               <BarChart
-
                 series={[
 
                   { data: monthsProfit, label: 'Прибыль'  },
@@ -463,7 +513,7 @@ export default function Home({orders, ordersNew, productsNew}) {
                       <tr>
                         <td>{(new Date(order.createdAt)).toLocaleString()}</td>
                         <td className={order.paid ? 'text-green-600' : 'text-red-600' }>
-                          {order.paid? "YES" : "NO"}
+                          {order.paid? "ДА" : "НЕТ"}
                        
                         </td>
                         <td>

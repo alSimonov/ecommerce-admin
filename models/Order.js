@@ -7,8 +7,10 @@ const OrderSchema = new Schema({
   email: String,
   postalCode: String,
   streetAddress: String,
+  houseNumber: String,
   country: String,
   paid: Boolean,
+  statusOrder: String,
 }, {
   timestamps: true,
 });
