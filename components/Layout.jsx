@@ -30,9 +30,9 @@ export default function Layout({children}) {
               </div> 
             </button>
 
-            <a href="/" className="underline text-gray-500">
+            {/* <a href="/" className="underline text-gray-500">
               Регистрация
-            </a>
+            </a> */}
           </div>
 
 
