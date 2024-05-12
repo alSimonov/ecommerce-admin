@@ -13,6 +13,7 @@ export const authOptions = {
         clientSecret: process.env.YANDEX_CLIENT_SECRET
     }),
     ],
+    secret : process.env.NEXT_PUBLIC_SECRET,
     adapter: MongoDBAdapter(clientPromise, {
         Users: "ClientUsers",
         Accounts: "ClientAccounts",
