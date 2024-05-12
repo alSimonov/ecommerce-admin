@@ -33,7 +33,8 @@ export default function DeleteProductPage() {
 					className="btn-red"
 				>
 					Да
-				
+					{/* Да */}
+				 
 				</button>
 				<button 
 					className="btn-default" 
