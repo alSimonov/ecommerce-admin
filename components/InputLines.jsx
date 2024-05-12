@@ -37,7 +37,7 @@ export default function InputLines({values, setValues, typeValue1, typeValue2, p
         {textButton}
       </button>
       {values.length > 0 && values.map( (value, index) => (
-        <div className="flex gap-1 mb-2">
+        <div key={index} className="flex gap-1 mb-2">
           <input 
             type={typeValue1} 
             value={value.value1}

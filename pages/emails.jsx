@@ -114,7 +114,7 @@ function Emails({swal}) {
           </thead>
           <tbody>
             {emails.length > 0 && emails.map(prop => (
-              <tr>
+              <tr key={prop._id}>
                 <td>{prop.email}</td>
                 <td>
                   <button 

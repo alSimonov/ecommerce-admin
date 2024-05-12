@@ -173,11 +173,11 @@ export default function ProductForm({
 					<option value="">Не выбрано</option>
 					{/* <option value="">Uncategorized</option> */}
 					{categories.length > 0 && categories.map(c => (
-						<option value={c._id}>{c.name}</option>
+						<option key={c._id} value={c._id}>{c.name}</option>
 					))}
 				</select>
 				{propertiesToFill.length > 0 && propertiesToFill.map(p => (
-					<div className="">
+					<div key={p._id} className="">
 						<label>{p.name[0].toUpperCase()+p.name.substring(1)}</label>
 						<div>
 							<select 
@@ -185,7 +185,7 @@ export default function ProductForm({
 								onChange={ev => setProductProp(p.name, ev.target.value)}
 							>
 								{p.values.map(v => (
-									<option value={v}>{v}</option>
+									<option key={v} value={v}>{v}</option>
 								))}
 							</select>
 						</div>
@@ -230,7 +230,7 @@ export default function ProductForm({
 				</button>}
 				
 				{measures.length > 0 && measures.map( (measure, index) => (
-					<div className="flex gap-1 mb-2">
+					<div key={index} className="flex gap-1 mb-2">
 						<input 
 							type="text" 
 							className="mb-0" 

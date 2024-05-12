@@ -15,17 +15,18 @@ import { Product } from "@/models/Product";
 import Link from "next/link";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { Category } from "@/models/Category";
 
 
 
 
 
 
-export default function Home({orders, ordersNew, productsNew}) {
+export default function Home({orders, ordersNew, productsNew, categories}) {
   const { data: session } = useSession();
   
   // const [orders, setOrders] = useState();
-  const [categories, setCategories] = useState();
+  // const [categories, setCategories] = useState();
 
   const [profitForThisMonth, setProfitForThisMonth] = useState("20000");
   const [profitForLastMonth, setProfitForLastMonth] = useState("27000");
@@ -51,6 +52,8 @@ export default function Home({orders, ordersNew, productsNew}) {
   const [nowMonth, setNowMonth] = useState();
   const [actualMonthSort, setActualMonthSort] = useState([]);
   const [monthsProfit, setMonthsProfit] = useState([]);
+
+  const [profitForCurrentMonthForCategory, setProfitForCurrentMonthForCategory] = useState([]);
 
   const [categoriesName, setCategoriesName] = useState();
 
@@ -177,8 +180,19 @@ export default function Home({orders, ordersNew, productsNew}) {
 
 
 
+    const ProfitForMonthForCategory = [];
+    let sumProfitForMonthForCategory = 0;
+    for (var i = 0; i < categories.length; i++) {
+      sumProfitForMonthForCategory = 0;
+      OrdersForMonth[actualMonthSortTemp[11]].map(p => p.line_items?.map( s => sumProfitForMonthForCategory += s.price_data.product_data.description === categories[i].name ? 
+          ( s.price_data.unit_amount / 100) * s.quantity : 0 ));
+      if(sumProfitForMonthForCategory > 0){
+        ProfitForMonthForCategory.push( {id: i, value: sumProfitForMonthForCategory , label : categories[i].name} );
+      }    
+    }
+
+    setProfitForCurrentMonthForCategory(ProfitForMonthForCategory);
     
-  
   }
 
 
@@ -413,11 +427,7 @@ export default function Home({orders, ordersNew, productsNew}) {
             <PieChart
               series={[
                 { 
-                  data: [
-                    { id: 0, value: 10, label: 'Брус' },
-                    { id: 1, value: 15, label: 'Доска' },
-                    { id: 2, value: 20, label: 'Ящик' },
-                  ],
+                  data: profitForCurrentMonthForCategory,
                   innerRadius: 30,
                   outerRadius: 100,
                   paddingAngle: 5,
@@ -510,7 +520,7 @@ export default function Home({orders, ordersNew, productsNew}) {
                   </thead>
                   <tbody>
                     {ordersNew.length > 0 && ordersNew.map(order => (
-                      <tr>
+                      <tr key={order._id}>
                         <td>{(new Date(order.createdAt)).toLocaleString()}</td>
                         <td className={order.paid ? 'text-green-600' : 'text-red-600' }>
                           {order.paid? "ДА" : "НЕТ"}
@@ -523,9 +533,9 @@ export default function Home({orders, ordersNew, productsNew}) {
                         </td>
                         <td>
                           {order.line_items.map(l => (
-                            <>
+                            <div key={l.price_data?.product_data?.name}>
                               {l.price_data?.product_data?.name} x {l.quantity}<br/>                    
-                            </>
+                            </div>
                           ))}
                         </td>
                       </tr>
@@ -573,12 +583,14 @@ export async function getServerSideProps() {
   const ordersNew = await Order.find({}, null, { sort: {'createdAt': -1}, limit: 5 });
   const orders = await Order.find({}, null, {sort: {'_id': -1}});
   const productsNew = await Product.find({}, null, {sort: {'updatedAt': -1} , limit: 5 });
+  const categories = await Category.find({}, null, {});
 
   return {
     props: {
       ordersNew: JSON.parse(JSON.stringify(ordersNew)),
       orders: JSON.parse(JSON.stringify(orders)),
       productsNew: JSON.parse(JSON.stringify(productsNew)),
+      categories: JSON.parse(JSON.stringify(categories)),
     },
   };
 
