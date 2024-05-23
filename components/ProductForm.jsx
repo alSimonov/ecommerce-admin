@@ -45,6 +45,19 @@ export default function ProductForm({
 		})
 	},[]);
 
+	
+	async function setFeaturedProduct(){
+
+		const data = {
+			productId: _id,
+			_id: "664f3dfe3b795a09c7aae38b"
+		};
+
+		// await axios.post('/api/featuredProduct', data);
+
+		await axios.put('/api/featuredProduct', data);
+	}
+
 
 	function changeTitle(value){
 		if (!value){
@@ -70,6 +83,9 @@ export default function ProductForm({
 	async function saveProduct(ev) {
 		if(errorTitleClass === "hidden" &&  errorCategoryClass === "hidden"){
 			
+			
+			if (_id) {
+
 			ev.preventDefault();
 			const data = {
 				title, description, price,
@@ -80,7 +96,7 @@ export default function ProductForm({
 				images, category, 
 				properties:productProperties
 			};
-			if (_id) {
+
 				//update
 				await axios.put('/api/products', {...data, _id});
 			} else {
@@ -113,6 +129,13 @@ export default function ProductForm({
 				propertiesToFill.push(...parentCat.properties);
 				catInfo = parentCat;
 			}
+			
+			propertiesToFill.forEach(element => {
+				if(!Object.hasOwn(productProperties, element.name)){
+					setProductProp(element.name, element.values[0]);
+				}
+			}); 
+			
 		}
 		else if (errorCategoryClass !== "warning"){
 			setErrorCategoryClass("warning");
@@ -152,12 +175,21 @@ export default function ProductForm({
 	
 		<div className="bg-white px-4 py-5 rounded-lg shadow-lg ">
 
+			{ _id &&
+				<button 
+					onClick={() => setFeaturedProduct()}
+					className="btn-primary"
+					>
+					Выставить на витрину
+				</button>
+			}
+
 			<form onSubmit={saveProduct}>
 				<label>Наименование товара</label>
 				{/* <label>Product name</label> */}
 				<input 
 					text="text" 
-					placeholder="product name" 
+					placeholder="Наименование товара" 
 					value={title} onChange={ev => changeTitle(ev.target.value)}
 				/>
 				<div>
@@ -255,6 +287,8 @@ export default function ProductForm({
 					</div>
 				))} 
 
+
+			
 				{errorTitleClass === "hidden" &&  errorCategoryClass === "hidden" &&
 					<button 
 						type="submit" 
@@ -272,6 +306,7 @@ export default function ProductForm({
 					</button>
 				}
 
+				
 
 			</form>
 		</div>

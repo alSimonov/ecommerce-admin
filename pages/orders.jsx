@@ -45,6 +45,10 @@ export default function OrdersPage(){
   async function saveOrder(order){
 
 
+    const dataNotif = {
+      order : order._id, email: order.email, watched: false, statusOrder: statusOrderSel,
+    };
+    
 
     const data = {
       name: order.name, email: order.email, city: order.city, postalCode : order.postalCode, 
@@ -54,6 +58,10 @@ export default function OrdersPage(){
     
     
     await axios.put('/api/orders', data);
+
+    console.log("fffffffffffffffffffffffffffffffffff");
+    console.log(dataNotif);
+    await axios.post('/api/notificationOrderStatusChange', dataNotif);
 
 
     fetchOrders();
@@ -117,6 +125,7 @@ export default function OrdersPage(){
       <table className="basic">
         <thead>
           <tr>
+            <th>Код</th>
             <th>Дата</th>
             <th>Оплата</th>
             <th>Заказчик</th>
@@ -128,10 +137,10 @@ export default function OrdersPage(){
         <tbody>
           {orders.length > 0 && orders.map(order => (
             <tr key={order._id}>
+              <td>{order._id}</td>
               <td>{(new Date(order.createdAt)).toLocaleString()}</td>
               <td className={order.paid ? 'text-green-600' : 'text-red-600' }>
                 {order.paid? "ДА" : "НЕТ"}
-                
               </td>
               <td>
                 Имя: {order.name}<br/> 
@@ -147,7 +156,6 @@ export default function OrdersPage(){
                 ))}
               </td>
               <td>
-
                 {order.statusOrder}
               </td>
 

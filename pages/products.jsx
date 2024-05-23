@@ -19,12 +19,15 @@ export default function Products() {
 				Добавить новые товары
 				{/* Add new products */}
 			</Link>
-			<table className="basic mt-2">
+			<div className="">
+
+			<table className="basic mt-2 ">
 				<thead>
 					<tr>
 						{/* <td>Product name</td> */}
 						<td>Наименование товара</td>
 						<td></td>
+						
 					</tr>
 				</thead>
 				<tbody>
@@ -47,6 +50,7 @@ export default function Products() {
 					))}
 				</tbody>
 			</table>
+		</div>
 		</Layout> 
 	)
 }

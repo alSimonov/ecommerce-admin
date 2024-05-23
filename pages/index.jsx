@@ -16,6 +16,8 @@ import Link from "next/link";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { Category } from "@/models/Category";
+import IconGear from "@/components/Icons/IconGear";
+import InputLines from "@/components/InputLines";
 
 
 
@@ -37,7 +39,7 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
   const [clientsForLastMonth, setClientsForLastMonth] = useState("60");
   const [percentClients, setPercentClients] = useState();
 
-  const [profitGoal, setProfitGoal] = useState("300000");
+  const [profitGoal, setProfitGoal] = useState(300000);
   const [percentProfitGoal, setPercentProfitGoal] = useState(); 
 
   const [totalOrders, setTotalOrders] = useState("65");
@@ -56,7 +58,18 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
   const [profitForCurrentMonthForCategory, setProfitForCurrentMonthForCategory] = useState([]);
 
   const [categoriesName, setCategoriesName] = useState();
+  
+  const [selectedMonth, setSelectedMonth] = useState(11);
+  
+  const [editedProfitGoal, setEditedProfitGoal] = useState(false);
 
+  const [editedProfitGoalValue, setEditedProfitGoalValue] = useState(0);
+
+
+
+  useEffect(() => {
+    processOrders(orders);
+  },[selectedMonth])
 
   useEffect(() => {
 		// axios.get('/api/categories').then(response => {
@@ -78,13 +91,27 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
  
 	}, []) 
 
+  
 
+  function onlyDigits(value){
+    if(value.length === 0){
+      return true;
+    }
+    return "1234567890".indexOf(value.substr(value.length - 1)) !== -1
+  }
+
+
+  function changeProfitGoalValue(value){
+    if (onlyDigits(value))
+      setProfitGoal(value);
+  }
+
+  function editProfitGoal(){
+    setEditedProfitGoal(!editedProfitGoal);
+  }
 
   function processCategories(categories) {
     setCategoriesName(categories.map(p => p.name));
-
-
-
   }
 
 
@@ -118,7 +145,7 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
 
 
 
-    setNowMonth(monthNames[today.getMonth()]);
+    setNowMonth(monthNames[Number( actualMonthSortTemp[selectedMonth]?.substr(5,2) )-1]);
     setActualMonthSort(actualMonthSortTemp);
 
     // const actualMonthSortTemp = monthNames.slice(today.getMonth()+1, 12).concat( monthNames.slice(0, today.getMonth()+1) );
@@ -148,8 +175,8 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
     // const OrdersForMonth[actualMonthSortTemp[10]] = orders.filter(p => p.createdAt.substr(0,7) === mmLast) ;
 
 
-    let sumProfitForThisMonth = ProfitForMonth[actualMonthSortTemp[11]];
-    let sumProfitForLastMonth = ProfitForMonth[actualMonthSortTemp[10]];
+    let sumProfitForThisMonth = ProfitForMonth[actualMonthSortTemp[selectedMonth]];
+    let sumProfitForLastMonth = ProfitForMonth[actualMonthSortTemp[selectedMonth - 1 ]];
 
     // OrdersForMonth[actualMonthSortTemp[11]].map(p => p.line_items.map( s => sumProfitForThisMonth += s.price_data.unit_amount ));
     // OrdersForMonth[actualMonthSortTemp[10]].map(p => p.line_items.map( s => sumProfitForLastMonth += s.price_data.unit_amount ));
@@ -160,8 +187,8 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
     calculateProfit(sumProfitForThisMonth, sumProfitForLastMonth);
 
 
-    const uniqueClientsForThisMonth = new Set( OrdersForMonth[actualMonthSortTemp[11]].map(p => p.email) );
-    const uniqueClientsForLastMonth = new Set( OrdersForMonth[actualMonthSortTemp[10]].map(p => p.email) );
+    const uniqueClientsForThisMonth = new Set( OrdersForMonth[actualMonthSortTemp[selectedMonth]]?.map(p => p.email) );
+    const uniqueClientsForLastMonth = new Set( OrdersForMonth[actualMonthSortTemp[selectedMonth - 1]]?.map(p => p.email) );
 
     setClientsForThisMonth(uniqueClientsForThisMonth.size);
     setClientsForLastMonth(uniqueClientsForLastMonth.size);
@@ -173,10 +200,10 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
     calculateProfitGoal(sumProfitForThisMonth, profitGoal);
 
 
-    setTotalOrders(OrdersForMonth[actualMonthSortTemp[11]].length);
-    setLastMonthOrders(OrdersForMonth[actualMonthSortTemp[10]].length);
+    setTotalOrders(OrdersForMonth[actualMonthSortTemp[selectedMonth]]?.length);
+    setLastMonthOrders(OrdersForMonth[actualMonthSortTemp[selectedMonth - 1]]?.length);
 
-    calculateOrders(OrdersForMonth[actualMonthSortTemp[11]].length, OrdersForMonth[actualMonthSortTemp[10]].length);
+    calculateOrders(OrdersForMonth[actualMonthSortTemp[selectedMonth]]?.length, OrdersForMonth[actualMonthSortTemp[selectedMonth - 1 ]]?.length);
 
 
 
@@ -184,7 +211,7 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
     let sumProfitForMonthForCategory = 0;
     for (var i = 0; i < categories.length; i++) {
       sumProfitForMonthForCategory = 0;
-      OrdersForMonth[actualMonthSortTemp[11]].map(p => p.line_items?.map( s => sumProfitForMonthForCategory += s.price_data.product_data.description === categories[i].name ? 
+      OrdersForMonth[actualMonthSortTemp[selectedMonth]]?.map(p => p.line_items?.map( s => sumProfitForMonthForCategory += s.price_data.product_data.description === categories[i].name ? 
           ( s.price_data.unit_amount / 100) * s.quantity : 0 ));
       if(sumProfitForMonthForCategory > 0){
         ProfitForMonthForCategory.push( {id: i, value: sumProfitForMonthForCategory , label : categories[i].name} );
@@ -343,17 +370,50 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
 
           <div className="bg-white px-4 py-5 rounded-lg shadow-lg w-full mr-4 ">
             <div className="">
-              <div>
+              <div className="flex justify-between">
                 План продаж
+                
+                { selectedMonth === 11 &&
+                  <button onClick={() => editProfitGoal()}>
+                    <IconGear/>
+                  </button>
+                }
               </div>
               
-              <div className="font-bold text-xl">
-                {percentProfitGoal}%
-              </div>
+              {editedProfitGoal &&
+
               
-              <div className="mt-3">
-                <LinearProgress variant="determinate" value={Number( percentProfitGoal )} />              
-              </div>
+
+                <>
+                
+                  <input 
+                    type="text"  
+                    placeholder="Цель" 
+                    value={profitGoal} onChange={ev => changeProfitGoalValue(ev.target.value)}
+                    />
+
+                  {/* <button 
+                    className="btn-primary"
+                    onClick={() => saveProfitGoal()}
+                    >
+                    Сохранить
+                  </button> */}
+                </>
+
+                  ||
+                <>
+                  <div className="font-bold text-xl">
+                    {percentProfitGoal}%
+                  </div>
+                  ₽{profitGoal}
+                  <div className="mt-3">
+                    <LinearProgress variant="determinate" value={Number( percentProfitGoal )} />              
+                  </div>
+                
+                </>
+               
+              }
+
 
 
               
@@ -407,7 +467,7 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
                   // { data: [51000, 6000, 49000, 30000, 6000, 49000, 30000, 6000, 49000, 30000, 6000, 49000], label: 'fffff' },
                 ]}
                 height={290}
-                
+                onItemClick={(event, d) => setSelectedMonth(d.dataIndex)}
                 xAxis={[{ data: actualMonthSort, scaleType: 'band' }]}
                 margin={{ top: 10, bottom: 30, left: 70, right: 10 }}
               />
@@ -516,6 +576,7 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
                       <th>Оплата</th>
                       <th>Заказчик</th>
                       <th>Товары</th>
+                      <th>Статус</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -534,9 +595,14 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
                         <td>
                           {order.line_items.map(l => (
                             <div key={l.price_data?.product_data?.name}>
-                              {l.price_data?.product_data?.name} x {l.quantity}<br/>                    
+                              {l.price_data?.product_data?.name} | {l.quantity}шт. | ₽{(l.price_data?.unit_amount / 100) * l.quantity}                   
+
+                              {/* {l.price_data?.product_data?.name} x {l.quantity}<br/>                     */}
                             </div>
                           ))}
+                        </td>
+                        <td>
+                          {order.statusOrder}
                         </td>
                       </tr>
                     ))}
@@ -582,7 +648,8 @@ export async function getServerSideProps() {
   await mongooseConnect();
   const ordersNew = await Order.find({}, null, { sort: {'createdAt': -1}, limit: 5 });
   const orders = await Order.find({}, null, {sort: {'_id': -1}});
-  const productsNew = await Product.find({}, null, {sort: {'updatedAt': -1} , limit: 5 });
+  // const productsNew = await Product.find({}, null, {sort: {'updatedAt': 1} , limit: 5 });
+  const productsNew = await Product.find({}, null, {sort: {'createdAt': -1} , limit: 5 });
   const categories = await Category.find({}, null, {});
 
   return {

@@ -2,8 +2,18 @@ import NextAuth, { getServerSession } from 'next-auth';
 import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import YandexProvider from "next-auth/providers/yandex";
 import clientPromise from '@/lib/mongodb';
+import { useState } from 'react';
+import axios from 'axios';
+import { mongooseConnect } from '@/lib/mongoose';
+import { Email } from '@/models/Email';
 
-const adminEmails = ['al.simonov20168090@yandex.ru']
+
+// const adminEmails = ['al.simonov20168090@yandex.ru']
+
+var adminEmails = ""
+mongooseConnect();
+adminEmails = (await Email.find()).map(ob => ob.email);
+
 
 export const authOptions = {
 
@@ -34,6 +44,7 @@ export const authOptions = {
 export default NextAuth(authOptions);
 
 export async function isAdminRequest(req, res){
+
     const session = await getServerSession(req, res, authOptions);
     if(!adminEmails.includes(session?.user?.email)){
         res.status(401);
