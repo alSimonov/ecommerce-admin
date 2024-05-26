@@ -19,11 +19,6 @@ export default function PhotoUpload ({images, setImages, isUploading, setIsUploa
 
 					data.append('file', files[0]);
 				
-					
-					console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrr");
-					console.log(files);
-					
-	
 					const res = await axios.post('/api/upload', data);
 	
 					setImages(oldImages => {

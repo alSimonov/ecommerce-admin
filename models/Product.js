@@ -10,6 +10,9 @@ const ProductSchema = new Schema({
 	category: {type: mongoose.Types.ObjectId, ref:'Category'},
 	rate: {type: Number, min: 0, max: 100},
 	properties: {type:Object},
+	available: {type:Boolean},
+	active: {type:Boolean},
+
 }, {
   timestamps: true,
 });

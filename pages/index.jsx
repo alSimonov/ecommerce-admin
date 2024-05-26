@@ -588,9 +588,18 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
                        
                         </td>
                         <td>
-                          {order.name} {order.email}<br/>
-                          {order.city} {order.postalCode} {order.country}<br/> 
-                          {order.streetAddress}
+                          Имя: {order.name}<br/> 
+                          Почта: {order.email}<br/>
+                          { order.postalCode && 
+                            <>
+                              Адрес: {order.postalCode}, {order.country} г.{order.city} ул.{order.streetAddress} д. {order.houseNumber}  <br/> 
+                            </>
+                            ||
+                            <>
+                              Самовывоз  <br/> 
+                            </>
+                          }
+
                         </td>
                         <td>
                           {order.line_items.map(l => (

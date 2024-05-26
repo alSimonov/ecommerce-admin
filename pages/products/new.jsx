@@ -5,7 +5,6 @@ export default function NewProduct() {
 	return (
 		<Layout>
 			<h1>Новый товар</h1>
-			{/* <h1>New Product</h1> */}
 			<ProductForm />
 		</Layout>
 	)

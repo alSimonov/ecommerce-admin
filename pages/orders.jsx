@@ -145,7 +145,15 @@ export default function OrdersPage(){
               <td>
                 Имя: {order.name}<br/> 
                 Почта: {order.email}<br/>
-                Адрес: {order.postalCode}, {order.country} г.{order.city} ул.{order.streetAddress} д. {order.houseNumber}  <br/> 
+                { order.postalCode && 
+                  <>
+                    Адрес: {order.postalCode}, {order.country} г.{order.city} ул.{order.streetAddress} д. {order.houseNumber}  <br/> 
+                  </>
+                  ||
+                  <>
+                    Самовывоз  <br/> 
+                  </>
+                }
                 
               </td>
               <td>

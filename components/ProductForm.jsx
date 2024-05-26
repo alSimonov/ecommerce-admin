@@ -18,7 +18,9 @@ export default function ProductForm({
 	images: existingImages,
 	category:assignedCategory,
 	rate:assignedRate,
-	properties:assignedProperties
+	properties:assignedProperties,
+	available: assignedAvailable,
+	active: assignedActive,
 
 }) {
 	const [title, setTitle] = useState(existingTitle || '');
@@ -32,6 +34,8 @@ export default function ProductForm({
 	const [isUploading, setIsUploading] = useState(false);
 	const [categories, setCategories] = useState([]);
 	const [rate, setRate] = useState(assignedRate || 0);
+	const [available, setAvailable] = useState(assignedAvailable || true);
+	const [active, setActive] = useState(assignedActive || true);
 	const router = useRouter();
 
 	
@@ -86,7 +90,7 @@ export default function ProductForm({
 			
 			if (_id) {
 
-			ev.preventDefault();
+			// ev.preventDefault();
 			const data = {
 				title, description, price,
 				measures:measures.map(m => ({
@@ -94,8 +98,12 @@ export default function ProductForm({
 					value:m.value
 				})), 
 				images, category, 
-				properties:productProperties
+				properties:productProperties,
+				active, available
 			};
+
+			console.log("uuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
+			console.log(data);
 
 				//update
 				await axios.put('/api/products', {...data, _id});
@@ -289,7 +297,7 @@ export default function ProductForm({
 
 
 			
-				{errorTitleClass === "hidden" &&  errorCategoryClass === "hidden" &&
+				{/* {errorTitleClass === "hidden" &&  errorCategoryClass === "hidden" && */}
 					<button 
 						type="submit" 
 						className="btn-primary"
@@ -297,14 +305,14 @@ export default function ProductForm({
 						Сохранить
 					</button>
 
-					||
+					{/* || */}
 
-					<button 
+					{/* <button 
 						className="btn-disabled"
 						>
 						Сохранить
-					</button>
-				}
+					</button> */}
+				{/* } */}
 
 				
 

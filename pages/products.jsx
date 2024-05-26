@@ -9,10 +9,59 @@ export default function Products() {
 	const [products, setProducts] = useState([]);
 
 	useEffect(() => {
+		fetchProducts();
+	}, [])
+
+	function fetchProducts() {
 		axios.get('/api/products').then(response => {
 			setProducts(response.data);
 		});
-	}, [])
+	}
+
+	async function hideAndShowProduct(product , value){
+
+		const data = {
+			title: product.title,
+			description: product.description, 
+			price: product.price,
+			measures: product.measures,
+			images: product.images, 
+			category: product.category, 
+			properties: product.properties,
+			available: product.available,
+			active: value,
+			_id: product._id,
+			
+		};
+
+			//update
+		await axios.put('/api/products', data);
+
+		fetchProducts();
+	}
+	async function availableProduct(product , value){
+
+		const data = {
+			title: product.title,
+			description: product.description, 
+			price: product.price,
+			measures: product.measures,
+			images: product.images, 
+			category: product.category, 
+			properties: product.properties,
+			available: value,
+			active: product.active,
+			_id: product._id,
+			
+		};
+
+
+			//update
+		await axios.put('/api/products', data);
+
+		fetchProducts();
+	}
+
 	return (
 		<Layout>
 			<Link className="btn-primary" href={'/products/new'}>
@@ -45,6 +94,29 @@ export default function Products() {
 									Удалить
 									{/* Delete */}
 								</Link>
+							</td>
+							<td>
+								{ product.available &&
+									<button onClick={() => availableProduct(product, false)} className="btn-default mr-2">
+										В наличии
+									</button>
+									||
+									<button onClick={() => availableProduct(product, true)} className="btn-default mr-2">
+										В наличии нет
+									</button>
+								}
+
+								{ product.active &&
+									<button onClick={() => hideAndShowProduct(product, false)} className="btn-default">
+										Скрыть
+									</button>
+									||
+									<button onClick={() => hideAndShowProduct(product, true)} className="btn-default">
+										Показать
+									</button>
+								}
+
+
 							</td>
 						</tr>
 					))}
