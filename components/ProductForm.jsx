@@ -87,9 +87,6 @@ export default function ProductForm({
 	async function saveProduct(ev) {
 		if(errorTitleClass === "hidden" &&  errorCategoryClass === "hidden"){
 			
-			
-			if (_id) {
-
 			// ev.preventDefault();
 			const data = {
 				title, description, price,
@@ -102,9 +99,8 @@ export default function ProductForm({
 				active, available
 			};
 
-			console.log("uuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
-			console.log(data);
-
+			if (_id) {
+			
 				//update
 				await axios.put('/api/products', {...data, _id});
 			} else {
