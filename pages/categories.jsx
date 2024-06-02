@@ -21,9 +21,7 @@ function Categories({swal}) {
     fetchCategories();
   },[])
  
-  // ff
-
-
+  
 
   function fetchCategories() {
     axios.get('/api/categories').then(result => {

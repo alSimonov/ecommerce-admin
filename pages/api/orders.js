@@ -7,23 +7,41 @@ export default async function handler (req,res) {
   await mongooseConnect();
   await isAdminRequest(req, res);
 
+	const limitNum = 8;
+
 
   if(method === 'GET'){
  
-   
-    if (req.query?.title && req.query?.sort) {
+    var skipNum = 0;
+		if(req.query?.page){
+				skipNum = ( req.query.page - 1 ) * limitNum;
+		}
+
+		var objQuery = {};
+
+
+
+    
+		if(req.query?.count){
+
+      if(req.query?.title){
+        
+        const queryDB = { "name": { "$regex": req.query?.title, "$options": "i" } };
+
+        res.json( Math.ceil( (await Order.find(queryDB, null, {})).length / limitNum));	
+
+
+       }else{
+        res.json( Math.ceil( (await Order.find({}, null, {})).length / limitNum ) );
+      }
+
+
+		}
+		else if (req.query?.title && req.query?.sort) {
         
         let sortSel =  "";
        
-        if(req.query?.sort === "date"){
-            sortSel =  {sort: { "createdAt" : req.query?.sortVect}};
-        } else if (req.query?.sort === "paid"){
-            sortSel =  {sort: { "paid" : req.query?.sortVect}};
-        }  else if (req.query?.sort === "clientInfo"){
-          sortSel =  {sort: { "name" : req.query?.sortVect}};
-        } else if (req.query?.sort === "statusOrder"){
-          sortSel =  {sort: { "statusOrder" : req.query?.sortVect}};
-        }
+        sortSel =  {sort: { [req.query?.sort] : req.query?.sortVect}, skip: skipNum, limit: limitNum};
 
         const queryDB = { "name": { "$regex": req.query?.title, "$options": "i" } };
 
@@ -34,22 +52,14 @@ export default async function handler (req,res) {
        
         let sortSel =  "";
 
-        if(req.query?.sort === "date"){
-          sortSel =  {sort: { "createdAt" : req.query?.sortVect}};
-        } else if (req.query?.sort === "paid"){
-            sortSel =  {sort: { "paid" : req.query?.sortVect}};
-        }  else if (req.query?.sort === "clientInfo"){
-          sortSel =  {sort: { "name" : req.query?.sortVect}};
-        } else if (req.query?.sort === "statusOrder"){
-          sortSel =  {sort: { "statusOrder" : req.query?.sortVect}};
-        }
+        sortSel =  {sort: { [req.query?.sort] : req.query?.sortVect}, skip: skipNum, limit: limitNum};
 
         res.json(await Order.find({}, null, sortSel));	
       }
       else {
        
 
-        res.json(await Order.find().sort({createdAt:-1}));	
+        res.json(await Order.find().sort({createdAt:-1}, null, { skip: skipNum, limit: limitNum}));	
       }
     
   }

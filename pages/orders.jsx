@@ -3,6 +3,8 @@ import IconEdit from "@/components/Icons/IconEdit";
 import Layout from "@/components/Layout";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Pagination from '@mui/material/Pagination';
+
 
 export default function OrdersPage(){
   const [orders, setOrders] = useState([]);
@@ -14,19 +16,29 @@ export default function OrdersPage(){
   const [selectedSort, setSelectedSort] = useState("date");
   const [selectedSortVect, setSelectedSortVect] = useState("-1");
 
+  const [page, setPage] = useState(1);
+  const [countProduct, setCountProduct] = useState(10);
+
+	const handleChangePage = (event, value) => {
+    setPage(value);
+  };
+
   useEffect(() => {
     fetchOrders();
-  },[title])
+  },[page])
 
+  
   useEffect(() => {
     fetchOrders();
   },[selectedSort])
-
+  
   useEffect(() => {
     fetchOrders();
   },[selectedSortVect])
-
-
+  
+  useEffect(() => {
+    fetchOrders();
+  },[title])
 
 
   useEffect(() => {
@@ -36,8 +48,12 @@ export default function OrdersPage(){
   
   
   function fetchOrders(){
-    axios.get('/api/orders?title='+title+'&sort='+selectedSort+'&sortVect='+selectedSortVect).then(response => {
+    axios.get('/api/orders?title='+title+'&sort='+selectedSort+'&sortVect='+selectedSortVect+'&page='+page).then(response => {
       setOrders(response.data);
+    });
+
+    axios.get('/api/orders?title='+title+'&count='+1).then(response => {
+      setCountProduct(response.data);
     });
   }
 
@@ -59,8 +75,6 @@ export default function OrdersPage(){
     
     await axios.put('/api/orders', data);
 
-    console.log("fffffffffffffffffffffffffffffffffff");
-    console.log(dataNotif);
     await axios.post('/api/notificationOrderStatusChange', dataNotif);
 
 
@@ -86,9 +100,9 @@ export default function OrdersPage(){
           value={selectedSort}
           onChange={ev => setSelectedSort(ev.target.value)}
         >
-          <option value="date">дате</option>
+          <option value="createdAt">дате</option>
           <option value="paid">оплате</option>
-          <option value="clientInfo">заказчику</option>
+          <option value="name">заказчику</option>
           <option value="statusOrder">статусу</option>
         </select>
         <select 
@@ -176,6 +190,11 @@ export default function OrdersPage(){
           ))}
         </tbody>
       </table>
+
+      <div className="flex mt-5 justify-center ">
+				<Pagination count={countProduct} page={page} onChange={handleChangePage} />
+			</div>
+
     </Layout>
   )
 }
