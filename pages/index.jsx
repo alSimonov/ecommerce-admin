@@ -19,13 +19,14 @@ import { Category } from "@/models/Category";
 import IconGear from "@/components/Icons/IconGear";
 import InputLines from "@/components/InputLines";
 import IconEdit from "@/components/Icons/IconEdit";
+import { ProfitGoal } from "@/models/ProfitGoal";
 
 
 
 
 
 
-export default function Home({orders, ordersNew, productsNew, categories}) {
+export default function Home({orders, ordersNew, productsNew, categories, profitGoalDB}) {
   const { data: session } = useSession();
   
   // const [orders, setOrders] = useState();
@@ -40,7 +41,7 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
   const [clientsForLastMonth, setClientsForLastMonth] = useState("60");
   const [percentClients, setPercentClients] = useState();
 
-  const [profitGoal, setProfitGoal] = useState(300000);
+  const [profitGoal, setProfitGoal] = useState(profitGoalDB);
   const [percentProfitGoal, setPercentProfitGoal] = useState(); 
 
   const [totalOrders, setTotalOrders] = useState("65");
@@ -92,7 +93,18 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
  
 	}, []) 
 
-  
+  async function saveProfitGoal(){
+
+    const data = {
+        goal: profitGoal,
+        _id: "665c572f8ab713b70a54cb31"
+     };
+
+    await axios.put('/api/profitGoals', data);
+
+    processOrders(orders);
+    editProfitGoal();
+  }
 
   function onlyDigits(value){
     if(value.length === 0){
@@ -393,12 +405,12 @@ export default function Home({orders, ordersNew, productsNew, categories}) {
                     value={profitGoal} onChange={ev => changeProfitGoalValue(ev.target.value)}
                     />
 
-                  {/* <button 
+                  <button 
                     className="btn-primary"
                     onClick={() => saveProfitGoal()}
                     >
                     Сохранить
-                  </button> */}
+                  </button>
                 </>
 
                   ||
@@ -658,6 +670,7 @@ export async function getServerSideProps() {
   // const productsNew = await Product.find({}, null, {sort: {'updatedAt': 1} , limit: 5 });
   const productsNew = await Product.find({}, null, {sort: {'createdAt': -1} , limit: 5 });
   const categories = await Category.find({}, null, {});
+  const profitGoalDB = (await ProfitGoal.find({}, null, {}))[0].goal;
 
   return {
     props: {
@@ -665,6 +678,7 @@ export async function getServerSideProps() {
       orders: JSON.parse(JSON.stringify(orders)),
       productsNew: JSON.parse(JSON.stringify(productsNew)),
       categories: JSON.parse(JSON.stringify(categories)),
+      profitGoalDB: JSON.parse(JSON.stringify(profitGoalDB)),
     },
   };
 
